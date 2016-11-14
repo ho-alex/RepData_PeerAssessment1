@@ -1,18 +1,37 @@
----
-title: "Reproducible Research: Peer Assessment 1"
-output: 
-  html_document:
-    keep_md: true
----
+# Reproducible Research: Peer Assessment 1
 
 
 ## Loading and preprocessing the data
 
-```{r preprocessing}
+
+```r
 library(ggplot2)
 library(reshape2)
 library(dplyr)
+```
 
+```
+## Warning: package 'dplyr' was built under R version 3.3.2
+```
+
+```
+## 
+## Attaching package: 'dplyr'
+```
+
+```
+## The following objects are masked from 'package:stats':
+## 
+##     filter, lag
+```
+
+```
+## The following objects are masked from 'package:base':
+## 
+##     intersect, setdiff, setequal, union
+```
+
+```r
 mydir <- "F:\\Coursera\\repro_res\\wk2"
 setwd(mydir)
 
@@ -26,7 +45,8 @@ The variables included in this dataset are:
 
 ## What is mean total number of steps taken per day?
 
-```{r meansteps}
+
+```r
 mydaysums <- data.frame(tapply(mydata$steps, mydata$date, sum, na.rm=TRUE))
 mydates <- unique(mydata$date)
 mydaysums <- cbind(mydates, mydaysums)
@@ -34,40 +54,70 @@ colnames(mydaysums) <- c("dates", "tot_steps")
 ```
 
 The following is a histogram displaying the distribution of average steps across all days:
-```{r meanstepshist}
+
+```r
 hist(mydaysums$tot_steps, breaks="FD", main = "Histogram of total steps taken in a day", xlab="Total # Steps", ylab="# days", ylim=c(0,40))
 ```
 
+![](PA1_template_files/figure-html/meanstepshist-1.png)<!-- -->
+
 The mean and median total number of steps per day are:
-```{r meanmediansteps}
+
+```r
 mean(mydaysums$tot_steps)
+```
+
+```
+## [1] 9354.23
+```
+
+```r
 median(mydaysums$tot_steps)
+```
+
+```
+## [1] 10395
 ```
 
 ## What is the average daily activity pattern?
 A time series plot of the 5-minute interval (x-axis) and the average number of
 steps taken, averaged across all days (y-axis) is displayed below:
-```{r timeseriesall}
+
+```r
 myintervsavg <- tapply(mydata$steps, mydata$interval, mean, na.rm=TRUE)
 plot(myintervsavg ~ unique(mydata$interval), type="l", xlab = "5 minute intervals",
      ylab = "average # steps")
 ```
 
+![](PA1_template_files/figure-html/timeseriesall-1.png)<!-- -->
+
 From the average across all days in the dataset, the interval with the maximum average number of steps, as well as the value itself, is:
-```{r maxintall}
+
+```r
 myintervsavg[which.max(myintervsavg)]
+```
+
+```
+##      835 
+## 206.1698
 ```
 
 ## Imputing missing values
 The total number of missing values (rows where steps = NA) in the data set is:
-```{r missingdatarows}
+
+```r
 sum(is.na(mydata$steps))
+```
+
+```
+## [1] 2304
 ```
 
 An arbitrarily-selected strategy to impute this missing data is to replace all NA 
 step rows with the average # of steps for that specific interval based on the existing
 data. The following code generates an imputed data set:
-```{r imputedata}
+
+```r
 myimpdata <- data.frame(mydata)
 
 # these are my rows for "myimpdata" with NA steps
@@ -91,7 +141,8 @@ for (i in 1:length(naindices)) {
 The following code generates a new histogram and a new mean and median based on the new
 data set (with imputed data, based on the aforementioned strategy):
 
-```{r newdataandplot}
+
+```r
 myimpdaysums <- data.frame(tapply(myimpdata$steps, myimpdata$date, sum, na.rm=TRUE))
 myimpdates <- unique(myimpdata$date)
 myimpdaysums <- cbind(myimpdates, myimpdaysums)
@@ -101,10 +152,24 @@ hist(myimpdaysums$tot_steps, breaks=seq(0,25000,by=5000), main = "Histogram of t
      xlab="Total # Steps", ylab="# days", ylim=c(0,40))
 ```
 
+![](PA1_template_files/figure-html/newdataandplot-1.png)<!-- -->
+
 The corresponding mean and median values for this imputed data set are:
-```{r newmeanmedian}
+
+```r
 mean(myimpdaysums$tot_steps)
+```
+
+```
+## [1] 10766.19
+```
+
+```r
 median(myimpdaysums$tot_steps)
+```
+
+```
+## [1] 10766.19
 ```
 
 The impact of imputing missing data in this manner is that there is
@@ -115,8 +180,8 @@ an increase in the frequency of days around the average # of total steps (as exp
 
 The following code creates a new factor variable in the dataset with two levels -
 "weekday" and "weekend", which indicates if a given date is a weekday or weekend day.
-```{r wkdaywkndcode}
 
+```r
 mynewdata <- mutate(myimpdata, wkdayorwknd = weekdays(as.Date(mydata$date)))
 weekdays1 <- c('Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday')
 
@@ -128,8 +193,8 @@ The following code creates a panel plot (2 rows, 1 column) containing a time ser
 interval (x-axis) and the average number of steps taken, averaged across all weekday
 days or weekend days (y-axis):
 
-```{r wkdaywkndplot}
 
+```r
 mywkdaydata <- mynewdata[mynewdata$wkdayorwknd=="weekday",]
 mywknddata <- mynewdata[mynewdata$wkdayorwknd=="weekend",]
 
@@ -148,5 +213,7 @@ plot(mywkdayavgs ~ unique(mydata$interval), type="l", xlab = "5 minute intervals
 plot(mywkndavgs ~ unique(mydata$interval), type="l", xlab = "5 minute intervals",
      ylab = "average # steps", main = "Weekend Averages", ylim=c(0,ymax))
 ```
+
+![](PA1_template_files/figure-html/wkdaywkndplot-1.png)<!-- -->
 
 It appears that generally, on weekdays, earlier in the day, there is a higher average # of steps as compared to the same timeslots on weekends, whereas on weekends, later in the day, there is a higher average # of steps as compared to the same timeslots on weekdays.
